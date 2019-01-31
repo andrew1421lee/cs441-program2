@@ -33,5 +33,7 @@
 @property (nonatomic, strong) IBOutlet UILabel *cell32;
 @property (nonatomic, strong) IBOutlet UILabel *cell33;
 
+@property (nonatomic, strong) IBOutlet UIButton *resetButton;
+
 @end
 
