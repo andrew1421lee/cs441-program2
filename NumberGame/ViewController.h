@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 #import <stdlib.h>
+#import "Tile.h"
 
 @interface ViewController : UIViewController<UIGestureRecognizerDelegate>
 
