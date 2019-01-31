@@ -38,6 +38,7 @@ static NSMutableArray *takenCells;
     currentTiles = [[NSMutableArray alloc] init];
     takenCells = [[NSMutableArray alloc] init];
     
+    // SWIPE GESTURE RECOGNIZERS
     UISwipeGestureRecognizer *swipeUp = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
     swipeUp.direction = UISwipeGestureRecognizerDirectionUp;
     [self.view addGestureRecognizer:swipeUp];
@@ -140,6 +141,27 @@ static NSMutableArray *takenCells;
     }];
 }
 
+- (NSNumber*) eatTiles:(int) srcIndex destinationIndex:(int) dstIndex {
+    Tile* srcTile = [self getTile:[NSNumber numberWithInt:srcIndex]];
+    Tile* dstTile = [self getTile:[NSNumber numberWithInt:dstIndex]];
+    
+    if([srcTile.value intValue] == [dstTile.value intValue]) {
+        // Delete destination tile, change value of src to 2x
+        [takenCells removeObject:dstTile.index];
+        [currentTiles removeObject:dstTile];
+        srcTile.value = [NSNumber numberWithInt:[srcTile.value intValue] * 2];
+        [srcTile.label setText:[NSString stringWithFormat:@"%d", [srcTile.value intValue]]];
+        [UIView animateWithDuration:0.5 animations:^{
+            dstTile.label.transform = CGAffineTransformScale(dstTile.label.transform, 0, 0);
+        } completion:^(BOOL finished) {
+            //
+        }];
+        [dstTile.label removeFromSuperview];
+        return dstTile.index;
+    }
+    return nil;
+}
+
 // 1 = up, 2 = down, 3 = right, 4 = left
 - (NSNumber*) findDestination:(NSNumber*) startIndex direction:(int) dir {
     int modifier = 0;
@@ -188,6 +210,11 @@ static NSMutableArray *takenCells;
         }
         
         if([takenCells containsObject:[NSNumber numberWithInt:destIndex]]) {
+            // CHECK IF IT CAN BE "EATEN"
+            NSNumber* dest = [self eatTiles:[startIndex intValue] destinationIndex:destIndex];
+            if(dest != nil) {
+                lastIndex = [dest intValue];
+            }
             found = true;
         } else {
             lastIndex = destIndex;
