@@ -146,7 +146,7 @@ static NSMutableArray *takenCells;
     
     if(dir == 1) {
         modifier = 1;
-        bound = ([startIndex intValue] / 4) * 4;
+        bound = (([startIndex intValue] / 4) + 1) * 4;
     }
     if(dir == 2) {
         modifier = -1;
@@ -235,10 +235,33 @@ static NSMutableArray *takenCells;
         }
     }
     
-    if([direction isEqualToString:@"LEFT"])
-    {
+    if([direction isEqualToString:@"LEFT"]) {
         for (int i = 4; i < 16; i++) {
             [self moveTilesHelper:i direction:4];
+        }
+    }
+    
+    if([direction isEqualToString:@"UP"]) {
+        for (int i = 2; i < 15; i += 4) {
+            [self moveTilesHelper:i direction:1];
+        }
+        for (int i = 1; i < 14; i += 4) {
+            [self moveTilesHelper:i direction:1];
+        }
+        for (int i = 0; i < 13; i += 4) {
+            [self moveTilesHelper:i direction:1];
+        }
+    }
+    
+    if([direction isEqualToString:@"DOWN"]) {
+        for (int i = 1; i < 14; i += 4) {
+            [self moveTilesHelper:i direction:2];
+        }
+        for (int i = 2; i < 15; i += 4) {
+            [self moveTilesHelper:i direction:2];
+        }
+        for (int i = 3; i < 16; i += 4) {
+            [self moveTilesHelper:i direction:2];
         }
     }
     
