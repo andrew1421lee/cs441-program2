@@ -20,10 +20,14 @@
             cell20, cell21, cell22, cell23,
             cell30, cell31, cell32, cell33;
 
+@synthesize resetButton;
+
 static NSArray *backgroundCells;
 static NSArray *tileValues;
 static NSMutableArray *currentTiles;
 static NSMutableArray *takenCells;
+
+static int noMoveCount;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -37,6 +41,8 @@ static NSMutableArray *takenCells;
     tileValues = [NSArray arrayWithObjects: [NSNumber numberWithInt:2], [NSNumber numberWithInt:4], nil];
     currentTiles = [[NSMutableArray alloc] init];
     takenCells = [[NSMutableArray alloc] init];
+    
+    noMoveCount = 0;
     
     // SWIPE GESTURE RECOGNIZERS
     UISwipeGestureRecognizer *swipeUp = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
@@ -57,6 +63,10 @@ static NSMutableArray *takenCells;
     
     [self spawnTile];
     // Do any additional setup after loading the view, typically from a nib.
+}
+
+- (IBAction) resetButtonPressed:(id) sender {
+    NSLog(@"RESET GAME");
 }
 
 - (void) handleSwipe:(UISwipeGestureRecognizer*) sender {
@@ -309,11 +319,16 @@ static NSMutableArray *takenCells;
     NSLog(@"%d tiles moved!", tilesMoved);
     
     if(tilesMoved > 0) {
+        noMoveCount = 0;
         [self spawnTile];
     } else if ([[self getEmptyIndex] intValue] < 0)
     {
-        [self gameOver];
-        return;
+        if(noMoveCount > 4) {
+            [self gameOver];
+            return;
+        } else {
+            noMoveCount++;
+        }
     }
 }
 
