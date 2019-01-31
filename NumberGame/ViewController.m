@@ -21,6 +21,7 @@
             cell30, cell31, cell32, cell33;
 
 static NSArray *backgroundCells;
+static NSArray *tileValues;
 static NSMutableArray *currentTiles;
 static NSMutableArray *takenCells;
 
@@ -33,6 +34,7 @@ static NSMutableArray *takenCells;
                        cell10, cell11, cell12, cell13,
                        cell20, cell21, cell22, cell23,
                        cell30, cell31, cell32, cell33, nil];
+    tileValues = [NSArray arrayWithObjects: [NSNumber numberWithInt:2], [NSNumber numberWithInt:4], nil];
     currentTiles = [[NSMutableArray alloc] init];
     takenCells = [[NSMutableArray alloc] init];
     
@@ -289,9 +291,13 @@ static NSMutableArray *takenCells;
     int height = bkgdCell.frame.size.height;
     int width = bkgdCell.frame.size.width;
     
+    // Get value of Tile
+    int randomValue = arc4random_uniform((uint32_t)[tileValues count]);
+    int value = [[tileValues objectAtIndex:randomValue] intValue];
+    
     // Create new Tile
     UILabel *madeLabel = [[UILabel alloc] initWithFrame:CGRectMake(x, y, width, height)];
-    [madeLabel setText:@"test"];
+    [madeLabel setText:[NSString stringWithFormat:@"%d", value]];
     [madeLabel setTextAlignment:NSTextAlignmentCenter];
     [madeLabel setBackgroundColor:[UIColor blueColor]];
     [madeLabel setAlpha:0.0f];
@@ -308,6 +314,7 @@ static NSMutableArray *takenCells;
     Tile* tile = [[Tile alloc] init];
     tile.label = madeLabel;
     tile.index = spawnPosition;
+    tile.value = [NSNumber numberWithInt:value];
     
     [currentTiles addObject:tile];
     
