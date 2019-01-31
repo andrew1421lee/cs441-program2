@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 
-@interface ViewController : UIViewController
+@interface ViewController : UIViewController<UIGestureRecognizerDelegate>
 
 @property (nonatomic, strong) IBOutlet UILabel *cell00;
 @property (nonatomic, strong) IBOutlet UILabel *cell01;

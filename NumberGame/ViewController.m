@@ -22,7 +22,40 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    UISwipeGestureRecognizer *swipeUp = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
+    swipeUp.direction = UISwipeGestureRecognizerDirectionUp;
+    [self.view addGestureRecognizer:swipeUp];
+    
+    UISwipeGestureRecognizer *swipeDown = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
+    swipeDown.direction = UISwipeGestureRecognizerDirectionDown;
+    [self.view addGestureRecognizer:swipeDown];
+    
+    UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
+    swipeLeft.direction = UISwipeGestureRecognizerDirectionLeft;
+    [self.view addGestureRecognizer:swipeLeft];
+    
+    UISwipeGestureRecognizer *swipeRight = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
+    swipeRight.direction = UISwipeGestureRecognizerDirectionRight;
+    [self.view addGestureRecognizer:swipeRight];
     // Do any additional setup after loading the view, typically from a nib.
+}
+
+- (void) handleSwipe:(UISwipeGestureRecognizer*) sender {
+    if(sender.direction == UISwipeGestureRecognizerDirectionUp) {
+        NSLog(@"UP");
+    }
+    
+    if(sender.direction == UISwipeGestureRecognizerDirectionDown) {
+        NSLog(@"DOWN");
+    }
+    
+    if(sender.direction == UISwipeGestureRecognizerDirectionLeft) {
+        NSLog(@"LEFT");
+    }
+    
+    if(sender.direction == UISwipeGestureRecognizerDirectionRight) {
+        NSLog(@"RIGHT");
+    }
 }
 
 
