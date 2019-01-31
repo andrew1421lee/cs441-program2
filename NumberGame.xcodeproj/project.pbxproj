@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1A120B77220370C20010861B /* Tile.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A120B76220370C20010861B /* Tile.m */; };
 		1A20F12D2201ED9300551822 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A20F12C2201ED9300551822 /* AppDelegate.m */; };
 		1A20F1302201ED9300551822 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A20F12F2201ED9300551822 /* ViewController.m */; };
 		1A20F1332201ED9300551822 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1A20F1312201ED9300551822 /* Main.storyboard */; };
@@ -16,6 +17,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1A120B752203701A0010861B /* Tile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Tile.h; sourceTree = "<group>"; };
+		1A120B76220370C20010861B /* Tile.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Tile.m; sourceTree = "<group>"; };
 		1A20F1282201ED9300551822 /* NumberGame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NumberGame.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A20F12B2201ED9300551822 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		1A20F12C2201ED9300551822 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -67,6 +70,8 @@
 				1A20F1362201ED9400551822 /* LaunchScreen.storyboard */,
 				1A20F1392201ED9400551822 /* Info.plist */,
 				1A20F13A2201ED9400551822 /* main.m */,
+				1A120B752203701A0010861B /* Tile.h */,
+				1A120B76220370C20010861B /* Tile.m */,
 			);
 			path = NumberGame;
 			sourceTree = "<group>";
@@ -144,6 +149,7 @@
 				1A20F1302201ED9300551822 /* ViewController.m in Sources */,
 				1A20F13B2201ED9400551822 /* main.m in Sources */,
 				1A20F12D2201ED9300551822 /* AppDelegate.m in Sources */,
+				1A120B77220370C20010861B /* Tile.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
