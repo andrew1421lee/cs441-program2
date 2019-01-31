@@ -69,7 +69,7 @@ static int noMoveCount;
     NSLog(@"RESET GAME");
     // Animate tiles falling!
     [self animateFallingTiles:0];
-    [UIView animateWithDuration:2 animations:^{
+    [UIView animateWithDuration:0.2 * [currentTiles count] animations:^{
         //[self.resetButton setTitle:@"RESETTING..." forState:UIControlStateNormal];
         [self.resetButton setAlpha:0.0f];
     } completion:^(BOOL finished) {
