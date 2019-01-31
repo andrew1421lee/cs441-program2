@@ -136,11 +136,17 @@ static NSMutableArray *takenCells;
     //int height = newPos.size.height;
     //int width = newPos.size.width;
     
-    [UIView animateWithDuration:0.5 animations:^{
+    [UIView animateWithDuration:0.2 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
         [tile.label setFrame:newPos];
     } completion:^(BOOL finished) {
         //
     }];
+    /*
+    [UIView animateWithDuration:0.2 animations:^{
+        [tile.label setFrame:newPos];
+    } completion:^(BOOL finished) {
+        //
+    }];*/
 }
 
 - (NSNumber*) eatTiles:(int) srcIndex destinationIndex:(int) dstIndex {
@@ -153,12 +159,12 @@ static NSMutableArray *takenCells;
         [currentTiles removeObject:dstTile];
         srcTile.value = [NSNumber numberWithInt:[srcTile.value intValue] * 2];
         [srcTile.label setText:[NSString stringWithFormat:@"%d", [srcTile.value intValue]]];
-        [UIView animateWithDuration:0.5 animations:^{
-            dstTile.label.transform = CGAffineTransformScale(dstTile.label.transform, 0, 0);
+        [UIView animateWithDuration:0.1 animations:^{
+            dstTile.label.transform = CGAffineTransformScale(dstTile.label.transform, 0.25, 0.25);
+            [dstTile.label setAlpha:0.0f];
         } completion:^(BOOL finished) {
-            //
+            [dstTile.label removeFromSuperview];
         }];
-        [dstTile.label removeFromSuperview];
         return dstTile.index;
     }
     return nil;
@@ -304,6 +310,10 @@ static NSMutableArray *takenCells;
     
     if(tilesMoved > 0) {
         [self spawnTile];
+    } else if ([[self getEmptyIndex] intValue] < 0)
+    {
+        [self gameOver];
+        return;
     }
 }
 
