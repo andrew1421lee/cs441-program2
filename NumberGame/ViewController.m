@@ -67,6 +67,31 @@ static int noMoveCount;
 
 - (IBAction) resetButtonPressed:(id) sender {
     NSLog(@"RESET GAME");
+    // Animate tiles falling!
+    [self animateFallingTiles:0];
+}
+
+- (void) animateFallingTiles:(int) index{
+    if(index > 15) return;
+    
+    UILabel *label = [self getTile:[NSNumber numberWithInt:index]].label;
+    
+    int x = label.frame.origin.x;
+    int y = label.frame.origin.y;// + [UIScreen mainScreen].bounds.size.height;
+    int width = label.frame.size.width;
+    int height = label.frame.size.height;
+    
+    [UIView animateWithDuration:0.1 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+        [label setFrame:CGRectMake(x, y - 15, width, height)];
+    } completion:^(BOOL finished) {
+        [self animateFallingTiles:index + 1];
+        
+        [UIView animateWithDuration:0.5 delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{
+            [label setFrame:CGRectMake(x, y + [UIScreen mainScreen].bounds.size.height, width, height)];
+        } completion:^(BOOL finished) {
+            //
+        }];
+    }];
 }
 
 - (void) handleSwipe:(UISwipeGestureRecognizer*) sender {
@@ -102,7 +127,7 @@ static int noMoveCount;
     
     [alert addAction:ok];
     [self presentViewController:alert animated:YES completion:nil];
-    
+    [resetButton setHidden:false];
 }
 
 // Returns index in backgroundCells that is empty
