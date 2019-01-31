@@ -128,9 +128,6 @@ static NSMutableArray *takenCells;
 }
 
 - (void) animateTileMovement:(Tile*)tile destination:(CGRect) newPos {
-    
-    int x = newPos.origin.x;
-    int y = newPos.origin.y;
     //int height = newPos.size.height;
     //int width = newPos.size.width;
     
@@ -141,8 +138,60 @@ static NSMutableArray *takenCells;
     }];
 }
 
-- (void) findDestination:(NSNumber*) start direction:(int) dir {
+// 1 = up, 2 = down, 3 = right, 4 = left
+- (NSNumber*) findDestination:(NSNumber*) startIndex direction:(int) dir {
+    int modifier = 0;
+    int bound = -1;
     
+    if(dir == 1) {
+        modifier = 1;
+        bound = ([startIndex intValue] / 4) * 4;
+    }
+    if(dir == 2) {
+        modifier = -1;
+        if([startIndex intValue] > 11) bound = 11;
+        else if([startIndex intValue] > 7) bound = 7;
+        else if([startIndex intValue] > 3) bound = 3;
+        else bound = -1;
+    }
+    if(dir == 3) {
+        modifier = 4;
+        bound = 16;
+    }
+    if(dir == 4) {
+        modifier = -4;
+        bound = -1;
+    }
+    
+    NSLog(@"findDestination - startIndex: %d direction: %d bound: %d", [startIndex intValue], dir, bound);
+    
+    bool found = false;
+    int lastIndex = [startIndex intValue];
+    int destIndex = [startIndex intValue] + modifier;
+    
+    while(!found) {
+        if([takenCells containsObject:[NSNumber numberWithInt:destIndex]]) {
+            found = true;
+        }
+        else if(destIndex >= bound)
+        {
+            found = true;
+        } else {
+            lastIndex = destIndex;
+            destIndex = destIndex + modifier;
+        }
+    }
+    
+    NSLog(@"findDestionation - destionation: %d", lastIndex);
+    
+    if(lastIndex == [startIndex intValue]) {
+        //return CGRectMake(0, 0, 0, 0);
+        return [NSNumber numberWithInt:-1];
+    }
+    else {
+        //return ((UILabel*)[backgroundCells objectAtIndex:lastIndex]).frame;
+        return [NSNumber numberWithInt:lastIndex];
+    }
 }
 
 - (void) moveTiles:(NSString*) direction {
@@ -151,6 +200,19 @@ static NSMutableArray *takenCells;
         // Skip rightmost column as they cannot move right
         for (int i = 11; i > -1; i--) {
             if([takenCells containsObject:[NSNumber numberWithInt:i]]) {
+                NSNumber* destination = [self findDestination:[NSNumber numberWithInt:i] direction:3];
+                
+                if ([destination intValue] < 0) continue;
+
+                Tile* t = [self getTile:[NSNumber numberWithInt:i]];
+                
+                t.index = destination;
+                [takenCells removeObject:[NSNumber numberWithInt:i]];
+                [takenCells addObject:t.index];
+                UILabel *bkgdCell = [backgroundCells objectAtIndex:[destination intValue]];
+                [self animateTileMovement:t destination:bkgdCell.frame];
+                
+                /*
                 // Check right if empty
                 if(![takenCells containsObject:[NSNumber numberWithInt:i + 4]])
                 {
@@ -165,6 +227,7 @@ static NSMutableArray *takenCells;
                     UILabel *bkgdCell = [backgroundCells objectAtIndex:i+4];
                     [self animateTileMovement:t destination:bkgdCell.frame];
                 }
+                 */
             }
         }
     }
