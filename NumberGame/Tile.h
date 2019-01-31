@@ -14,10 +14,12 @@
 @interface Tile : NSObject {
     UILabel *label;
     NSNumber *index;
+    NSNumber *value;
 }
 
 @property UILabel *label;
 @property NSNumber *index;
+@property NSNumber *value;
 
 @end
 

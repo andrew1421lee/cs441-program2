@@ -13,5 +13,6 @@
 
 @synthesize label;
 @synthesize index;
+@synthesize value;
 
 @end
