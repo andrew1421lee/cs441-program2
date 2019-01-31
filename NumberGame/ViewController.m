@@ -142,6 +142,7 @@ static NSMutableArray *takenCells;
 - (NSNumber*) findDestination:(NSNumber*) startIndex direction:(int) dir {
     int modifier = 0;
     int bound = -1;
+    //int boundComp = 0; // 1 = must be greater than bound, 2 = must be les than bound
     
     if(dir == 1) {
         modifier = 1;
@@ -170,11 +171,21 @@ static NSMutableArray *takenCells;
     int destIndex = [startIndex intValue] + modifier;
     
     while(!found) {
-        if([takenCells containsObject:[NSNumber numberWithInt:destIndex]]) {
-            found = true;
+        if(modifier < 0) {
+            if(destIndex <= bound)
+            {
+                found = true;
+                break;
+            }
+        }else{
+            if(destIndex >= bound)
+            {
+                found = true;
+                break;
+            }
         }
-        else if(destIndex >= bound)
-        {
+        
+        if([takenCells containsObject:[NSNumber numberWithInt:destIndex]]) {
             found = true;
         } else {
             lastIndex = destIndex;
@@ -182,7 +193,7 @@ static NSMutableArray *takenCells;
         }
     }
     
-    NSLog(@"findDestionation - destionation: %d", lastIndex);
+    NSLog(@"findDestination - destination: %d", lastIndex);
     
     if(lastIndex == [startIndex intValue]) {
         //return CGRectMake(0, 0, 0, 0);
@@ -194,41 +205,40 @@ static NSMutableArray *takenCells;
     }
 }
 
+- (void) moveTilesHelper:(int) index direction:(int) dir{
+    if([takenCells containsObject:[NSNumber numberWithInt:index]]) {
+        // See how far right we can go
+        NSNumber* destination = [self findDestination:[NSNumber numberWithInt:index] direction:dir];
+        // Oh we can't go right at all, ok go do the next tile
+        if ([destination intValue] < 0) return;
+        
+        // Get our current tile
+        Tile* t = [self getTile:[NSNumber numberWithInt:index]];
+        
+        // Update values
+        t.index = destination;
+        [takenCells removeObject:[NSNumber numberWithInt:index]];
+        [takenCells addObject:t.index];
+        
+        // Get destination cell and animate tile to position
+        UILabel *bkgdCell = [backgroundCells objectAtIndex:[destination intValue]];
+        [self animateTileMovement:t destination:bkgdCell.frame];
+    }
+}
+
 - (void) moveTiles:(NSString*) direction {
     if([direction isEqualToString:@"RIGHT"]) {
         // Loop through starting from topright and ending at bottomleft
         // Skip rightmost column as they cannot move right
         for (int i = 11; i > -1; i--) {
-            if([takenCells containsObject:[NSNumber numberWithInt:i]]) {
-                NSNumber* destination = [self findDestination:[NSNumber numberWithInt:i] direction:3];
-                
-                if ([destination intValue] < 0) continue;
-
-                Tile* t = [self getTile:[NSNumber numberWithInt:i]];
-                
-                t.index = destination;
-                [takenCells removeObject:[NSNumber numberWithInt:i]];
-                [takenCells addObject:t.index];
-                UILabel *bkgdCell = [backgroundCells objectAtIndex:[destination intValue]];
-                [self animateTileMovement:t destination:bkgdCell.frame];
-                
-                /*
-                // Check right if empty
-                if(![takenCells containsObject:[NSNumber numberWithInt:i + 4]])
-                {
-                    // Get tile at index i
-                    Tile* t = [self getTile:[NSNumber numberWithInt:i]];
-                    // Move tile index right
-                    t.index = [NSNumber numberWithInt:i + 4];
-                    // Update takenCells
-                    [takenCells removeObject:[NSNumber numberWithInt:i]];
-                    [takenCells addObject:t.index];
-                    // Get position of destionation cell
-                    UILabel *bkgdCell = [backgroundCells objectAtIndex:i+4];
-                    [self animateTileMovement:t destination:bkgdCell.frame];
-                }
-                 */
-            }
+            [self moveTilesHelper:i direction:3];
+        }
+    }
+    
+    if([direction isEqualToString:@"LEFT"])
+    {
+        for (int i = 4; i < 16; i++) {
+            [self moveTilesHelper:i direction:4];
         }
     }
     
