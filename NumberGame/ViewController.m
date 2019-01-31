@@ -54,6 +54,8 @@ static NSMutableArray *takenCells;
     UISwipeGestureRecognizer *swipeRight = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
     swipeRight.direction = UISwipeGestureRecognizerDirectionRight;
     [self.view addGestureRecognizer:swipeRight];
+    
+    [self spawnTile];
     // Do any additional setup after loading the view, typically from a nib.
 }
 
@@ -234,12 +236,12 @@ static NSMutableArray *takenCells;
     }
 }
 
-- (void) moveTilesHelper:(int) index direction:(int) dir{
+- (int) moveTilesHelper:(int) index direction:(int) dir{
     if([takenCells containsObject:[NSNumber numberWithInt:index]]) {
         // See how far right we can go
         NSNumber* destination = [self findDestination:[NSNumber numberWithInt:index] direction:dir];
         // Oh we can't go right at all, ok go do the next tile
-        if ([destination intValue] < 0) return;
+        if ([destination intValue] < 0) return 0;
         
         // Get our current tile
         Tile* t = [self getTile:[NSNumber numberWithInt:index]];
@@ -252,49 +254,57 @@ static NSMutableArray *takenCells;
         // Get destination cell and animate tile to position
         UILabel *bkgdCell = [backgroundCells objectAtIndex:[destination intValue]];
         [self animateTileMovement:t destination:bkgdCell.frame];
+        return 1;
     }
+    return 0;
 }
 
 - (void) moveTiles:(NSString*) direction {
+    int tilesMoved = 0;
+    
     if([direction isEqualToString:@"RIGHT"]) {
         // Loop through starting from topright and ending at bottomleft
         // Skip rightmost column as they cannot move right
         for (int i = 11; i > -1; i--) {
-            [self moveTilesHelper:i direction:3];
+            tilesMoved += [self moveTilesHelper:i direction:3];
         }
     }
     
     if([direction isEqualToString:@"LEFT"]) {
         for (int i = 4; i < 16; i++) {
-            [self moveTilesHelper:i direction:4];
+            tilesMoved += [self moveTilesHelper:i direction:4];
         }
     }
     
     if([direction isEqualToString:@"UP"]) {
         for (int i = 2; i < 15; i += 4) {
-            [self moveTilesHelper:i direction:1];
+            tilesMoved += [self moveTilesHelper:i direction:1];
         }
         for (int i = 1; i < 14; i += 4) {
-            [self moveTilesHelper:i direction:1];
+            tilesMoved += [self moveTilesHelper:i direction:1];
         }
         for (int i = 0; i < 13; i += 4) {
-            [self moveTilesHelper:i direction:1];
+            tilesMoved += [self moveTilesHelper:i direction:1];
         }
     }
     
     if([direction isEqualToString:@"DOWN"]) {
         for (int i = 1; i < 14; i += 4) {
-            [self moveTilesHelper:i direction:2];
+            tilesMoved += [self moveTilesHelper:i direction:2];
         }
         for (int i = 2; i < 15; i += 4) {
-            [self moveTilesHelper:i direction:2];
+            tilesMoved += [self moveTilesHelper:i direction:2];
         }
         for (int i = 3; i < 16; i += 4) {
-            [self moveTilesHelper:i direction:2];
+            tilesMoved += [self moveTilesHelper:i direction:2];
         }
     }
     
-    [self spawnTile];
+    NSLog(@"%d tiles moved!", tilesMoved);
+    
+    if(tilesMoved > 0) {
+        [self spawnTile];
+    }
 }
 
 - (void) spawnTile {
