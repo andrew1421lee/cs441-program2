@@ -69,6 +69,17 @@ static int noMoveCount;
     NSLog(@"RESET GAME");
     // Animate tiles falling!
     [self animateFallingTiles:0];
+    [UIView animateWithDuration:2 animations:^{
+        //[self.resetButton setTitle:@"RESETTING..." forState:UIControlStateNormal];
+        [self.resetButton setAlpha:0.0f];
+    } completion:^(BOOL finished) {
+        [self.resetButton setAlpha:1.0f];
+        //[self.resetButton setTitle:@"RESET" forState:UIControlStateNormal];
+        currentTiles = [[NSMutableArray alloc] init];
+        takenCells = [[NSMutableArray alloc] init];
+        noMoveCount = 0;
+        [self spawnTile];
+    }];
 }
 
 - (void) animateFallingTiles:(int) index{
@@ -119,6 +130,7 @@ static int noMoveCount;
 }
 
 - (void) gameOver {
+    /*
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"GAME OVER" message:@"You lost! Too bad" preferredStyle:UIAlertControllerStyleAlert];
     
     UIAlertAction *ok = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
@@ -127,7 +139,7 @@ static int noMoveCount;
     
     [alert addAction:ok];
     [self presentViewController:alert animated:YES completion:nil];
-    [resetButton setHidden:false];
+    [resetButton setHidden:false];*/
 }
 
 // Returns index in backgroundCells that is empty
