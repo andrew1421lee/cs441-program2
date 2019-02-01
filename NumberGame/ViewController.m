@@ -24,6 +24,7 @@
 
 static NSArray *backgroundCells;
 static NSArray *tileValues;
+
 static NSMutableArray *currentTiles;
 static NSMutableArray *takenCells;
 
@@ -62,6 +63,7 @@ static int noMoveCount;
     [self.view addGestureRecognizer:swipeRight];
     
     [self spawnTile];
+    [self spawnTile];
     // Do any additional setup after loading the view, typically from a nib.
 }
 
@@ -78,6 +80,7 @@ static int noMoveCount;
         currentTiles = [[NSMutableArray alloc] init];
         takenCells = [[NSMutableArray alloc] init];
         noMoveCount = 0;
+        [self spawnTile];
         [self spawnTile];
     }];
 }
@@ -206,6 +209,10 @@ static int noMoveCount;
         [currentTiles removeObject:dstTile];
         srcTile.value = [NSNumber numberWithInt:[srcTile.value intValue] * 2];
         [srcTile.label setText:[NSString stringWithFormat:@"%d", [srcTile.value intValue]]];
+        // set color
+        int colorMulti = [srcTile.value intValue] * 5;
+        [srcTile.label setBackgroundColor:[UIColor colorWithRed:1.0f green:(255.0f - colorMulti) / 255.0f blue:1.0f alpha:1.0f]];
+        
         [UIView animateWithDuration:0.1 animations:^{
             dstTile.label.transform = CGAffineTransformScale(dstTile.label.transform, 0.25, 0.25);
             [dstTile.label setAlpha:0.0f];
@@ -398,10 +405,14 @@ static int noMoveCount;
     UILabel *madeLabel = [[UILabel alloc] initWithFrame:CGRectMake(x, y, width, height)];
     [madeLabel setText:[NSString stringWithFormat:@"%d", value]];
     [madeLabel setTextAlignment:NSTextAlignmentCenter];
-    [madeLabel setBackgroundColor:[UIColor blueColor]];
     [madeLabel setAlpha:0.0f];
     madeLabel.layer.cornerRadius = 8;
     madeLabel.layer.masksToBounds = TRUE;
+    
+    // set tile color
+    int colorMulti = value * 5;
+    UIColor *color = [[UIColor alloc] initWithRed:1.0f green:(255 - colorMulti) / 255.0f blue:1.0f alpha:1.0f];
+    [madeLabel setBackgroundColor: color];
     
     // Animate tile appearing so it is not delayed
     [UIView animateWithDuration:0.5 animations:^{
