@@ -95,13 +95,21 @@ static int noMoveCount;
     int width = label.frame.size.width;
     int height = label.frame.size.height;
     
+    int xModify = 1 + arc4random_uniform(5);
+    int leftRight;
+    if(index % 2 == 0) {
+        leftRight = 1;
+    } else {
+        leftRight = -1;
+    }
+    
     [UIView animateWithDuration:0.1 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-        [label setFrame:CGRectMake(x, y - 15, width, height)];
+        [label setFrame:CGRectMake(x + (xModify * leftRight), y - 15, width, height)];
     } completion:^(BOOL finished) {
         [self animateFallingTiles:index + 1];
         
         [UIView animateWithDuration:0.5 delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{
-            [label setFrame:CGRectMake(x, y + [UIScreen mainScreen].bounds.size.height, width, height)];
+            [label setFrame:CGRectMake(x + (xModify * 20 * leftRight), y + [UIScreen mainScreen].bounds.size.height, width, height)];
         } completion:^(BOOL finished) {
             //
         }];
