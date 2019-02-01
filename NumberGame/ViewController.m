@@ -212,6 +212,8 @@ static int noMoveCount;
         // set color
         int colorMulti = [srcTile.value intValue] * 5;
         [srcTile.label setBackgroundColor:[UIColor colorWithRed:1.0f green:(255.0f - colorMulti) / 255.0f blue:1.0f alpha:1.0f]];
+        [srcTile.label.layer setBorderColor: [UIColor colorWithRed:1.0f green:(200 + colorMulti) / 255.0f blue:1.0f alpha:1.0f].CGColor];
+        [srcTile.label.layer setBorderWidth: 2.0f];
         
         [UIView animateWithDuration:0.1 animations:^{
             dstTile.label.transform = CGAffineTransformScale(dstTile.label.transform, 0.25, 0.25);
@@ -413,6 +415,8 @@ static int noMoveCount;
     int colorMulti = value * 5;
     UIColor *color = [[UIColor alloc] initWithRed:1.0f green:(255 - colorMulti) / 255.0f blue:1.0f alpha:1.0f];
     [madeLabel setBackgroundColor: color];
+    [madeLabel.layer setBorderColor: [UIColor colorWithRed:1.0f green:(200 + colorMulti) / 255.0f blue:1.0f alpha:1.0f].CGColor];
+    [madeLabel.layer setBorderWidth: 2.0f];
     
     // Animate tile appearing so it is not delayed
     [UIView animateWithDuration:0.5 animations:^{
