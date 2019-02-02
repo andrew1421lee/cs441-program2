@@ -35,5 +35,7 @@
 
 @property (nonatomic, strong) IBOutlet UIButton *resetButton;
 
+@property (nonatomic, strong) IBOutlet UILabel *scoreDisplay;
+
 @end
 
