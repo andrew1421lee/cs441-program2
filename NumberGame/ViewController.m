@@ -20,7 +20,7 @@
             cell20, cell21, cell22, cell23,
             cell30, cell31, cell32, cell33;
 
-@synthesize resetButton;
+@synthesize resetButton, scoreDisplay;
 
 static NSArray *backgroundCells;
 static NSArray *tileValues;
@@ -64,6 +64,7 @@ static int noMoveCount;
     
     [self spawnTile];
     [self spawnTile];
+    [self updateScore];
     // Do any additional setup after loading the view, typically from a nib.
 }
 
@@ -82,6 +83,7 @@ static int noMoveCount;
         noMoveCount = 0;
         [self spawnTile];
         [self spawnTile];
+        [self updateScore];
     }];
 }
 
@@ -207,6 +209,22 @@ static int noMoveCount;
     }];*/
 }
 
+// Will flatly decrement the green, then red by 10 each time
+- (UIColor*) chooseColor:(int) value {
+    
+    //there is a bug here, 64 and 128 both return 6 somehow??????????
+    int modifier = log10f(value) / log10f(2);
+
+    float greenValue = (255.0f - ((float)pow(2, modifier) * 5.0f)) / 255.0f;
+    float blueValue = 1.0f;
+    
+    if(greenValue < 0) {
+        blueValue = (255.0f - ((float)pow(2, modifier - 4) * 5.0f)) / 255.0f;
+    }
+    
+    return [[UIColor alloc] initWithRed:1.0f green:greenValue blue:blueValue alpha:1.0f];
+}
+
 - (NSNumber*) eatTiles:(int) srcIndex destinationIndex:(int) dstIndex {
     Tile* srcTile = [self getTile:[NSNumber numberWithInt:srcIndex]];
     Tile* dstTile = [self getTile:[NSNumber numberWithInt:dstIndex]];
@@ -218,9 +236,8 @@ static int noMoveCount;
         srcTile.value = [NSNumber numberWithInt:[srcTile.value intValue] * 2];
         [srcTile.label setText:[NSString stringWithFormat:@"%d", [srcTile.value intValue]]];
         // set color
-        int colorMulti = [srcTile.value intValue] * 5;
-        [srcTile.label setBackgroundColor:[UIColor colorWithRed:1.0f green:(255.0f - colorMulti) / 255.0f blue:1.0f alpha:1.0f]];
-        [srcTile.label.layer setBorderColor: [UIColor colorWithRed:1.0f green:(200 + colorMulti) / 255.0f blue:1.0f alpha:1.0f].CGColor];
+        [srcTile.label setBackgroundColor:[self chooseColor:[srcTile.value intValue]]];
+        [srcTile.label.layer setBorderColor: [self chooseColor:8].CGColor];
         [srcTile.label.layer setBorderWidth: 2.0f];
         
         [UIView animateWithDuration:0.1 animations:^{
@@ -374,6 +391,7 @@ static int noMoveCount;
     
     if(tilesMoved > 0) {
         noMoveCount = 0;
+        [self updateScore];
         [self spawnTile];
     } else if ([[self getEmptyIndex] intValue] < 0)
     {
@@ -384,6 +402,16 @@ static int noMoveCount;
             noMoveCount++;
         }
     }
+}
+
+- (void) updateScore {
+    int totalScore = 0;
+    
+    for (Tile *t in currentTiles) {
+        totalScore += [t.value intValue];
+    }
+    
+    [scoreDisplay setText:[NSString stringWithFormat:@"%d", totalScore]];
 }
 
 - (void) spawnTile {
@@ -420,10 +448,8 @@ static int noMoveCount;
     madeLabel.layer.masksToBounds = TRUE;
     
     // set tile color
-    int colorMulti = value * 5;
-    UIColor *color = [[UIColor alloc] initWithRed:1.0f green:(255 - colorMulti) / 255.0f blue:1.0f alpha:1.0f];
-    [madeLabel setBackgroundColor: color];
-    [madeLabel.layer setBorderColor: [UIColor colorWithRed:1.0f green:(200 + colorMulti) / 255.0f blue:1.0f alpha:1.0f].CGColor];
+    [madeLabel setBackgroundColor: [self chooseColor:value]];
+    [madeLabel.layer setBorderColor: [self chooseColor:8].CGColor];
     [madeLabel.layer setBorderWidth: 2.0f];
     
     // Animate tile appearing so it is not delayed
