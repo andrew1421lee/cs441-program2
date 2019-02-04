@@ -229,7 +229,9 @@ static int noMoveCount;
     Tile* srcTile = [self getTile:[NSNumber numberWithInt:srcIndex]];
     Tile* dstTile = [self getTile:[NSNumber numberWithInt:dstIndex]];
     
-    if(dstTile.changed) { return nil; }
+    if(dstTile.changed || srcTile.changed) {
+        return nil;
+    }
     
     if([srcTile.value intValue] == [dstTile.value intValue]) {
         // Delete destination tile, change value of src to 2x
@@ -242,6 +244,7 @@ static int noMoveCount;
         [srcTile.label.layer setBorderColor: [self chooseColor:8].CGColor];
         [srcTile.label.layer setBorderWidth: 2.0f];
         srcTile.changed = true;
+        dstTile.changed = true;
         
         [UIView animateWithDuration:0.1 animations:^{
             dstTile.label.transform = CGAffineTransformScale(dstTile.label.transform, 0.25, 0.25);
@@ -316,10 +319,6 @@ static int noMoveCount;
     
     NSLog(@"findDestination - destination: %d", lastIndex);
     
-    for(Tile *t in currentTiles) {
-        t.changed = false;
-    }
-    
     if(lastIndex == [startIndex intValue]) {
         //return CGRectMake(0, 0, 0, 0);
         return [NSNumber numberWithInt:-1];
@@ -332,7 +331,7 @@ static int noMoveCount;
 
 - (int) moveTilesHelper:(int) index direction:(int) dir{
     if([takenCells containsObject:[NSNumber numberWithInt:index]]) {
-        // See how far right we can go
+        // See how far we can go
         NSNumber* destination = [self findDestination:[NSNumber numberWithInt:index] direction:dir];
         // Oh we can't go right at all, ok go do the next tile
         if ([destination intValue] < 0) return 0;
@@ -398,6 +397,11 @@ static int noMoveCount;
     
     if(tilesMoved > 0) {
         noMoveCount = 0;
+        
+        for(Tile *t in currentTiles) {
+            t.changed = false;
+        }
+        
         [self updateScore];
         [self spawnTile];
     } else if ([[self getEmptyIndex] intValue] < 0)
