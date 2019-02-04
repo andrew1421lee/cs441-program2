@@ -15,11 +15,13 @@
     UILabel *label;
     NSNumber *index;
     NSNumber *value;
+    BOOL changed;
 }
 
 @property UILabel *label;
 @property NSNumber *index;
 @property NSNumber *value;
+@property BOOL changed;
 
 @end
 

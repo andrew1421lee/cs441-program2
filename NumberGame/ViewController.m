@@ -229,6 +229,8 @@ static int noMoveCount;
     Tile* srcTile = [self getTile:[NSNumber numberWithInt:srcIndex]];
     Tile* dstTile = [self getTile:[NSNumber numberWithInt:dstIndex]];
     
+    if(dstTile.changed) { return nil; }
+    
     if([srcTile.value intValue] == [dstTile.value intValue]) {
         // Delete destination tile, change value of src to 2x
         [takenCells removeObject:dstTile.index];
@@ -239,6 +241,7 @@ static int noMoveCount;
         [srcTile.label setBackgroundColor:[self chooseColor:[srcTile.value intValue]]];
         [srcTile.label.layer setBorderColor: [self chooseColor:8].CGColor];
         [srcTile.label.layer setBorderWidth: 2.0f];
+        srcTile.changed = true;
         
         [UIView animateWithDuration:0.1 animations:^{
             dstTile.label.transform = CGAffineTransformScale(dstTile.label.transform, 0.25, 0.25);
@@ -312,6 +315,10 @@ static int noMoveCount;
     }
     
     NSLog(@"findDestination - destination: %d", lastIndex);
+    
+    for(Tile *t in currentTiles) {
+        t.changed = false;
+    }
     
     if(lastIndex == [startIndex intValue]) {
         //return CGRectMake(0, 0, 0, 0);

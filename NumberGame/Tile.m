@@ -14,5 +14,6 @@
 @synthesize label;
 @synthesize index;
 @synthesize value;
+@synthesize changed;
 
 @end
