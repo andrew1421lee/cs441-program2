@@ -28,8 +28,6 @@ static NSArray *tileValues;
 static NSMutableArray *currentTiles;
 static NSMutableArray *takenCells;
 
-static int noMoveCount;
-
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -42,8 +40,6 @@ static int noMoveCount;
     tileValues = [NSArray arrayWithObjects: [NSNumber numberWithInt:2], [NSNumber numberWithInt:4], nil];
     currentTiles = [[NSMutableArray alloc] init];
     takenCells = [[NSMutableArray alloc] init];
-    
-    noMoveCount = 0;
     
     // SWIPE GESTURE RECOGNIZERS
     UISwipeGestureRecognizer *swipeUp = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
@@ -69,34 +65,41 @@ static int noMoveCount;
 }
 
 - (IBAction) resetButtonPressed:(id) sender {
-    NSLog(@"RESET GAME");
+    NSLog(@"[resetButtonPressed] RESETTING GAME");
     // Animate tiles falling!
     [self animateFallingTiles:0];
+    
+    // Animate button disappearing based on how many tiles need to be animated
     [UIView animateWithDuration:0.2 * [currentTiles count] animations:^{
-        //[self.resetButton setTitle:@"RESETTING..." forState:UIControlStateNormal];
         [self.resetButton setAlpha:0.0f];
     } completion:^(BOOL finished) {
+        // Once animation is done, reset the game variables
         [self.resetButton setAlpha:1.0f];
-        //[self.resetButton setTitle:@"RESET" forState:UIControlStateNormal];
+
         currentTiles = [[NSMutableArray alloc] init];
         takenCells = [[NSMutableArray alloc] init];
-        noMoveCount = 0;
+        
+        // Spawn new tiles and update the score
         [self spawnTile];
         [self spawnTile];
         [self updateScore];
     }];
 }
 
+// Animate falling tile when reset, given position index
 - (void) animateFallingTiles:(int) index{
     if(index > 15) return;
     
+    // Grab label from tile at index
     UILabel *label = [self getTileByPositionIndex:[NSNumber numberWithInt:index]].label;
     
+    // Get initial values of label
     int x = label.frame.origin.x;
-    int y = label.frame.origin.y;// + [UIScreen mainScreen].bounds.size.height;
+    int y = label.frame.origin.y;
     int width = label.frame.size.width;
     int height = label.frame.size.height;
     
+    // Randomly choose position modifier (1-4) and determine left or right by index
     int xModify = 1 + arc4random_uniform(5);
     int leftRight;
     if(index % 2 == 0) {
@@ -105,11 +108,14 @@ static int noMoveCount;
         leftRight = -1;
     }
     
+    // Animate upwards at an angle defined by modifier and leftRight
     [UIView animateWithDuration:0.1 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
         [label setFrame:CGRectMake(x + (xModify * leftRight), y - 15, width, height)];
     } completion:^(BOOL finished) {
+        // Once tile is at the peak, animate the next tile
         [self animateFallingTiles:index + 1];
         
+        // Then animate the falling tile
         [UIView animateWithDuration:0.5 delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{
             [label setFrame:CGRectMake(x + (xModify * 20 * leftRight), y + [UIScreen mainScreen].bounds.size.height, width, height)];
         } completion:^(BOOL finished) {
@@ -118,40 +124,43 @@ static int noMoveCount;
     }];
 }
 
+// The gesture recognizers will call this method, which will then send data to the moveTiles method
+// to move the tiles
 - (void) handleSwipe:(UISwipeGestureRecognizer*) sender {
     if(sender.direction == UISwipeGestureRecognizerDirectionUp) {
-        NSLog(@"UP");
+        NSLog(@"[handleSwipe] Incoming Gesture: UP");
         [self moveTiles:@"UP"];
     }
     
     if(sender.direction == UISwipeGestureRecognizerDirectionDown) {
-        NSLog(@"DOWN");
+        NSLog(@"[handleSwipe] Incoming Gesture: DOWN");
         [self moveTiles:@"DOWN"];
     }
     
     if(sender.direction == UISwipeGestureRecognizerDirectionLeft) {
-        NSLog(@"LEFT");
+        NSLog(@"[handleSwipe] Incoming Gesture: LEFT");
         [self moveTiles:@"LEFT"];
     }
     
     if(sender.direction == UISwipeGestureRecognizerDirectionRight) {
-        NSLog(@"RIGHT");
+        NSLog(@"[handleSwipe] Incoming Gesture: RIGHT");
         [self moveTiles:@"RIGHT"];
     }
-    
-    //[self spawnTile];
 }
 
 - (void) gameOver {
-     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"GAME OVER" message:@"You lost! Too bad" preferredStyle:UIAlertControllerStyleAlert];
-     
-     UIAlertAction *ok = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-         [self resetButtonPressed:nil];
+    // Create new popup to display game over message
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"GAME OVER" message:@"You lost! Too bad" preferredStyle:UIAlertControllerStyleAlert];
+    
+    // Assign button to reset thegame
+    UIAlertAction *ok = [UIAlertAction actionWithTitle:@"Try Again" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [self resetButtonPressed:nil];
      }];
-     
-     [alert addAction:ok];
-     [self presentViewController:alert animated:YES completion:nil];
-     //[resetButton setHidden:false];
+    
+    [alert addAction:ok];
+    
+    // Show the popup
+    [self presentViewController:alert animated:YES completion:nil];
 }
 
 // Returns true if game over
@@ -160,13 +169,14 @@ static int noMoveCount;
     if([currentTiles count] != 16) {
         return false;
     }
-    
+    // Call recursive function with starting index
     return [self _checkGameOverRecursive:0];
 }
 
 - (BOOL) _checkGameOverRecursive:(int) index {
-    
+    // Get the tile by index
     Tile *src = [self getTileByPositionIndex:[NSNumber numberWithInt:index]];
+    
     // DO NOT CHECK ABOVE IF TILE IS TOPMOST
     if(index != 3 && index != 7 && index != 11 && index != 15) {
         // check tile above (+ 1)
@@ -204,30 +214,37 @@ static int noMoveCount;
         }
     }
     
+    // No matches found, game over
     return true;
 }
 
-// Returns index in backgroundCells that is empty
-- (NSNumber*) getEmptyIndex {
-    bool found = false;
-    bool gameOver = false;
+// Returns index in backgroundCells that is empty, -1 if full
+- (NSNumber*) getEmptyPositionIndex {
+    bool foundIndex = false;
+    bool boardIsFull = false;
+    
+    // Grab a random position index
     NSNumber *index = [NSNumber numberWithUnsignedInteger:arc4random_uniform(16)];
     
-    while(!found && !gameOver){
+    // Loop
+    while(!foundIndex && !boardIsFull){
+        // check if no empty positions
         if([takenCells count] == 16) {
-            NSLog(@"GAME OVER");
-            gameOver = true;
+            NSLog(@"[getEmptyPositionIndex] No empty positions!");
+            boardIsFull = true;
             break;
         }
         
+        // Check if position is empty, otherwise get new position
         if(![takenCells containsObject:(index)]) {
-            found = true;
+            foundIndex = true;
         } else {
             index = [NSNumber numberWithUnsignedInteger:arc4random_uniform(16)];
         }
     }
     
-    if(gameOver)
+    // If no empty positions, return -1
+    if(boardIsFull)
     {
         index = [NSNumber numberWithInt:-1];
     }
@@ -235,6 +252,7 @@ static int noMoveCount;
     return index;
 }
 
+// Returns tile at given position index
 - (Tile*) getTileByPositionIndex:(NSNumber*) index {
     for (Tile* t in currentTiles) {
         if([t.index intValue] == [index intValue]) {
@@ -244,77 +262,84 @@ static int noMoveCount;
     return nil;
 }
 
+// Given tile and pos, move tile to pos
 - (void) animateTileMovement:(Tile*)tile destination:(CGRect) newPos {
-    //int height = newPos.size.height;
-    //int width = newPos.size.width;
-    
     [UIView animateWithDuration:0.2 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
         [tile.label setFrame:newPos];
     } completion:^(BOOL finished) {
         //
     }];
-    /*
-    [UIView animateWithDuration:0.2 animations:^{
-        [tile.label setFrame:newPos];
-    } completion:^(BOOL finished) {
-        //
-    }];*/
 }
 
-// Will flatly decrement the green, then red by 10 each time
+// Will determine color based the value of x (2^x = value)
 - (UIColor*) chooseColor:(int) value {
     
     //there is a bug here, 64 and 128 both return 6 somehow??????????
     int modifier = log10f(value) / log10f(2);
 
+    // Decrease green value by x * 5
     float greenValue = (255.0f - ((float)pow(2, modifier) * 5.0f)) / 255.0f;
     float blueValue = 1.0f;
     
+    // If green value is 0, decrease blue value by value 5.0 as well
     if(greenValue < 0) {
         blueValue = (255.0f - ((float)pow(2, modifier - 4) * 5.0f)) / 255.0f;
     }
     
+    // Return new color
     return [[UIColor alloc] initWithRed:1.0f green:greenValue blue:blueValue alpha:1.0f];
 }
 
-- (NSNumber*) eatTiles:(int) srcIndex destinationIndex:(int) dstIndex {
+// Given two positions, see if they can be combined
+- (NSNumber*) tryCombineTilesByIndex:(int) srcIndex destinationIndex:(int) dstIndex {
+    // Get the two tile objects
     Tile* srcTile = [self getTileByPositionIndex:[NSNumber numberWithInt:srcIndex]];
     Tile* dstTile = [self getTileByPositionIndex:[NSNumber numberWithInt:dstIndex]];
     
+    // Check if either tile was already combined in the same move
     if(dstTile.changed || srcTile.changed) {
         return nil;
     }
     
+    // If the values are the same, combine
     if([srcTile.value intValue] == [dstTile.value intValue]) {
         // Delete destination tile, change value of src to 2x
         [takenCells removeObject:dstTile.index];
         [currentTiles removeObject:dstTile];
         srcTile.value = [NSNumber numberWithInt:[srcTile.value intValue] * 2];
+        // Update the label of src
         [srcTile.label setText:[NSString stringWithFormat:@"%d", [srcTile.value intValue]]];
         // set color
         [srcTile.label setBackgroundColor:[self chooseColor:[srcTile.value intValue]]];
         [srcTile.label.layer setBorderColor: [self chooseColor:8].CGColor];
         [srcTile.label.layer setBorderWidth: 2.0f];
+        // set changed flag
         srcTile.changed = true;
         dstTile.changed = true;
         
+        // Animate dst deletion
         [UIView animateWithDuration:0.1 animations:^{
             dstTile.label.transform = CGAffineTransformScale(dstTile.label.transform, 0.25, 0.25);
             [dstTile.label setAlpha:0.0f];
         } completion:^(BOOL finished) {
             [dstTile.label removeFromSuperview];
         }];
+        // Return position for src to go to
         return dstTile.index;
     }
+    // Cannot be combined
     return nil;
 }
 
 // 1 = up, 2 = down, 3 = right, 4 = left
 - (NSNumber*) findDestination:(NSNumber*) startIndex direction:(int) dir {
+    // How to reach the next tile in given direction
     int modifier = 0;
-    int bound = -1;
-    //int boundComp = 0; // 1 = must be greater than bound, 2 = must be les than bound
     
+    // Used to stop code from checking tiles not next to it
+    int bound = -1;
+    
+    // Set modifier and bound based on direction and starting index
     if(dir == 1) {
         modifier = 1;
         bound = (([startIndex intValue] / 4) + 1) * 4;
@@ -335,13 +360,18 @@ static int noMoveCount;
         bound = -1;
     }
     
-    NSLog(@"findDestination - startIndex: %d direction: %d bound: %d", [startIndex intValue], dir, bound);
+    NSLog(@"[findDestination] startIndex: %d direction: %d bound: %d", [startIndex intValue], dir, bound);
     
     bool found = false;
+    
+    // current position
     int lastIndex = [startIndex intValue];
+    
+    // Next position
     int destIndex = [startIndex intValue] + modifier;
     
     while(!found) {
+        // Stop if bound is reached
         if(modifier < 0) {
             if(destIndex <= bound)
             {
@@ -356,27 +386,30 @@ static int noMoveCount;
             }
         }
         
+        // If next position has a tile
         if([takenCells containsObject:[NSNumber numberWithInt:destIndex]]) {
             // CHECK IF IT CAN BE "EATEN"
-            NSNumber* dest = [self eatTiles:[startIndex intValue] destinationIndex:destIndex];
+            NSNumber* dest = [self tryCombineTilesByIndex:[startIndex intValue] destinationIndex:destIndex];
+            // Cannot be eaten, use previous position
             if(dest != nil) {
                 lastIndex = [dest intValue];
             }
             found = true;
+            
+        // Otherwise, continue to next tiles
         } else {
             lastIndex = destIndex;
             destIndex = destIndex + modifier;
         }
     }
     
-    NSLog(@"findDestination - destination: %d", lastIndex);
+    NSLog(@"[findDestination] destination: %d", lastIndex);
     
+    // If position is where we found it, tile does not move
     if(lastIndex == [startIndex intValue]) {
-        //return CGRectMake(0, 0, 0, 0);
         return [NSNumber numberWithInt:-1];
     }
     else {
-        //return ((UILabel*)[backgroundCells objectAtIndex:lastIndex]).frame;
         return [NSNumber numberWithInt:lastIndex];
     }
 }
@@ -445,18 +478,16 @@ static int noMoveCount;
         }
     }
     
-    NSLog(@"%d tiles moved!", tilesMoved);
+    NSLog(@"[moveTiles] %d tiles moved!", tilesMoved);
     
     if(tilesMoved > 0) {
-        noMoveCount = 0;
-        
         for(Tile *t in currentTiles) {
             t.changed = false;
         }
         
         [self updateScore];
         [self spawnTile];
-    } else if ([[self getEmptyIndex] intValue] < 0)
+    } else if ([[self getEmptyPositionIndex] intValue] < 0)
     {
         if([self checkGameOver]) {
             [self gameOver];
@@ -465,6 +496,7 @@ static int noMoveCount;
     }
 }
 
+// Adds up all the values in current tiles
 - (void) updateScore {
     int totalScore = 0;
     
@@ -477,7 +509,7 @@ static int noMoveCount;
 
 - (void) spawnTile {
     // Get index of empty position
-    NSNumber *spawnPosition = [self getEmptyIndex];
+    NSNumber *spawnPosition = [self getEmptyPositionIndex];
     if([spawnPosition intValue] < 0){
         if([self checkGameOver]) {
             [self gameOver];
@@ -485,7 +517,7 @@ static int noMoveCount;
         }
     }
     
-    NSLog(@"Spawning tile at: %d", [spawnPosition intValue]);
+    NSLog(@"[spawnTile] Spawning tile at: %d", [spawnPosition intValue]);
     [takenCells addObject:spawnPosition];
     
     // Get background cell of index
