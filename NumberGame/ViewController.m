@@ -90,7 +90,7 @@ static int noMoveCount;
 - (void) animateFallingTiles:(int) index{
     if(index > 15) return;
     
-    UILabel *label = [self getTile:[NSNumber numberWithInt:index]].label;
+    UILabel *label = [self getTileByPositionIndex:[NSNumber numberWithInt:index]].label;
     
     int x = label.frame.origin.x;
     int y = label.frame.origin.y;// + [UIScreen mainScreen].bounds.size.height;
@@ -143,16 +143,68 @@ static int noMoveCount;
 }
 
 - (void) gameOver {
-    /*
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"GAME OVER" message:@"You lost! Too bad" preferredStyle:UIAlertControllerStyleAlert];
+     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"GAME OVER" message:@"You lost! Too bad" preferredStyle:UIAlertControllerStyleAlert];
+     
+     UIAlertAction *ok = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+         [self resetButtonPressed:nil];
+     }];
+     
+     [alert addAction:ok];
+     [self presentViewController:alert animated:YES completion:nil];
+     //[resetButton setHidden:false];
+}
+
+// Returns true if game over
+- (BOOL) checkGameOver {
+    // Do not call recursive function if board is not filled
+    if([currentTiles count] != 16) {
+        return false;
+    }
     
-    UIAlertAction *ok = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        //
-    }];
+    return [self _checkGameOverRecursive:0];
+}
+
+- (BOOL) _checkGameOverRecursive:(int) index {
     
-    [alert addAction:ok];
-    [self presentViewController:alert animated:YES completion:nil];
-    [resetButton setHidden:false];*/
+    Tile *src = [self getTileByPositionIndex:[NSNumber numberWithInt:index]];
+    // DO NOT CHECK ABOVE IF TILE IS TOPMOST
+    if(index != 3 && index != 7 && index != 11 && index != 15) {
+        // check tile above (+ 1)
+        Tile *above = [self getTileByPositionIndex:[NSNumber numberWithInt:index + 1]];
+        
+        // Found a match, no need to continue to recurse
+        if(src.value == above.value) {
+            return false;
+        }
+    }
+    
+    // DO NOT CHECK RIGHT IF TILE IS RIGHTMOST
+    if(index != 12 && index != 13 && index != 14 && index != 15) {
+        // check tile to the right (+4)
+        Tile *right = [self getTileByPositionIndex:[NSNumber numberWithInt:index + 4]];
+        
+        // Found a match, no need to continue to recurse
+        if(src.value == right.value) {
+            return false;
+        }
+    }
+    
+    // No match left or right, call on tile above
+    if(index != 3 && index != 7 && index != 11 && index != 15) {
+        // Match found, stop
+        if(![self _checkGameOverRecursive:index + 1]) {
+            return false;
+        }
+    }
+    
+    // No match after checking top, check right
+    if(index != 12 && index != 13 && index != 14 && index != 15) {
+        if(![self _checkGameOverRecursive:index + 1]) {
+            return false;
+        }
+    }
+    
+    return true;
 }
 
 // Returns index in backgroundCells that is empty
@@ -183,7 +235,7 @@ static int noMoveCount;
     return index;
 }
 
-- (Tile*) getTile:(NSNumber*) index {
+- (Tile*) getTileByPositionIndex:(NSNumber*) index {
     for (Tile* t in currentTiles) {
         if([t.index intValue] == [index intValue]) {
             return t;
@@ -226,8 +278,8 @@ static int noMoveCount;
 }
 
 - (NSNumber*) eatTiles:(int) srcIndex destinationIndex:(int) dstIndex {
-    Tile* srcTile = [self getTile:[NSNumber numberWithInt:srcIndex]];
-    Tile* dstTile = [self getTile:[NSNumber numberWithInt:dstIndex]];
+    Tile* srcTile = [self getTileByPositionIndex:[NSNumber numberWithInt:srcIndex]];
+    Tile* dstTile = [self getTileByPositionIndex:[NSNumber numberWithInt:dstIndex]];
     
     if(dstTile.changed || srcTile.changed) {
         return nil;
@@ -337,7 +389,7 @@ static int noMoveCount;
         if ([destination intValue] < 0) return 0;
         
         // Get our current tile
-        Tile* t = [self getTile:[NSNumber numberWithInt:index]];
+        Tile* t = [self getTileByPositionIndex:[NSNumber numberWithInt:index]];
         
         // Update values
         t.index = destination;
@@ -406,11 +458,9 @@ static int noMoveCount;
         [self spawnTile];
     } else if ([[self getEmptyIndex] intValue] < 0)
     {
-        if(noMoveCount > 4) {
+        if([self checkGameOver]) {
             [self gameOver];
             return;
-        } else {
-            noMoveCount++;
         }
     }
 }
@@ -429,8 +479,10 @@ static int noMoveCount;
     // Get index of empty position
     NSNumber *spawnPosition = [self getEmptyIndex];
     if([spawnPosition intValue] < 0){
-        [self gameOver];
-        return;
+        if([self checkGameOver]) {
+            [self gameOver];
+            return;
+        }
     }
     
     NSLog(@"Spawning tile at: %d", [spawnPosition intValue]);
