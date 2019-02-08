@@ -86,44 +86,6 @@ static NSMutableArray *takenCells;
     }];
 }
 
-// Animate falling tile when reset, given position index
-- (void) animateFallingTiles:(int) index{
-    if(index > 15) return;
-    
-    // Grab label from tile at index
-    UILabel *label = [self getTileByPositionIndex:[NSNumber numberWithInt:index]].label;
-    
-    // Get initial values of label
-    int x = label.frame.origin.x;
-    int y = label.frame.origin.y;
-    int width = label.frame.size.width;
-    int height = label.frame.size.height;
-    
-    // Randomly choose position modifier (1-4) and determine left or right by index
-    int xModify = 1 + arc4random_uniform(5);
-    int leftRight;
-    if(index % 2 == 0) {
-        leftRight = 1;
-    } else {
-        leftRight = -1;
-    }
-    
-    // Animate upwards at an angle defined by modifier and leftRight
-    [UIView animateWithDuration:0.1 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-        [label setFrame:CGRectMake(x + (xModify * leftRight), y - 15, width, height)];
-    } completion:^(BOOL finished) {
-        // Once tile is at the peak, animate the next tile
-        [self animateFallingTiles:index + 1];
-        
-        // Then animate the falling tile
-        [UIView animateWithDuration:0.5 delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{
-            [label setFrame:CGRectMake(x + (xModify * 20 * leftRight), y + [UIScreen mainScreen].bounds.size.height, width, height)];
-        } completion:^(BOOL finished) {
-            //
-        }];
-    }];
-}
-
 // The gesture recognizers will call this method, which will then send data to the moveTiles method
 // to move the tiles
 - (void) handleSwipe:(UISwipeGestureRecognizer*) sender {
@@ -260,15 +222,6 @@ static NSMutableArray *takenCells;
         }
     }
     return nil;
-}
-
-// Given tile and pos, move tile to pos
-- (void) animateTileMovement:(Tile*)tile destination:(CGRect) newPos {
-    [UIView animateWithDuration:0.2 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-        [tile.label setFrame:newPos];
-    } completion:^(BOOL finished) {
-        //
-    }];
 }
 
 // Will determine color based the value of x (2^x = value)
@@ -562,6 +515,53 @@ static NSMutableArray *takenCells;
     [currentTiles addObject:tile];
     
     [[self view] addSubview:madeLabel];
+}
+
+// Animate falling tile when reset, given position index
+- (void) animateFallingTiles:(int) index{
+    if(index > 15) return;
+    
+    // Grab label from tile at index
+    UILabel *label = [self getTileByPositionIndex:[NSNumber numberWithInt:index]].label;
+    
+    // Get initial values of label
+    int x = label.frame.origin.x;
+    int y = label.frame.origin.y;
+    int width = label.frame.size.width;
+    int height = label.frame.size.height;
+    
+    // Randomly choose position modifier (1-4) and determine left or right by index
+    int xModify = 1 + arc4random_uniform(5);
+    int leftRight;
+    if(index % 2 == 0) {
+        leftRight = 1;
+    } else {
+        leftRight = -1;
+    }
+    
+    // Animate upwards at an angle defined by modifier and leftRight
+    [UIView animateWithDuration:0.1 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+        [label setFrame:CGRectMake(x + (xModify * leftRight), y - 15, width, height)];
+    } completion:^(BOOL finished) {
+        // Once tile is at the peak, animate the next tile
+        [self animateFallingTiles:index + 1];
+        
+        // Then animate the falling tile
+        [UIView animateWithDuration:0.5 delay:0 options:UIViewAnimationOptionCurveEaseIn animations:^{
+            [label setFrame:CGRectMake(x + (xModify * 20 * leftRight), y + [UIScreen mainScreen].bounds.size.height, width, height)];
+        } completion:^(BOOL finished) {
+            //
+        }];
+    }];
+}
+
+// Given tile and pos, move tile to pos
+- (void) animateTileMovement:(Tile*)tile destination:(CGRect) newPos {
+    [UIView animateWithDuration:0.2 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+        [tile.label setFrame:newPos];
+    } completion:^(BOOL finished) {
+        //
+    }];
 }
 
 @end
