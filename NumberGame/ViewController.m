@@ -28,6 +28,8 @@ static NSArray *tileValues;
 static NSMutableArray *currentTiles;
 static NSMutableArray *takenCells;
 
+static bool animationPlaying;
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -40,6 +42,8 @@ static NSMutableArray *takenCells;
     tileValues = [NSArray arrayWithObjects: [NSNumber numberWithInt:2], [NSNumber numberWithInt:4], nil];
     currentTiles = [[NSMutableArray alloc] init];
     takenCells = [[NSMutableArray alloc] init];
+    
+    animationPlaying = true;
     
     // SWIPE GESTURE RECOGNIZERS
     UISwipeGestureRecognizer *swipeUp = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
@@ -69,6 +73,7 @@ static NSMutableArray *takenCells;
     // Animate tiles falling!
     [self animateFallingTiles:0];
     
+    animationPlaying = true;
     // Animate button disappearing based on how many tiles need to be animated
     [UIView animateWithDuration:0.2 * [currentTiles count] animations:^{
         [self.resetButton setAlpha:0.0f];
@@ -83,12 +88,20 @@ static NSMutableArray *takenCells;
         [self spawnTile];
         [self spawnTile];
         [self updateScore];
+        
+        animationPlaying = false;
     }];
 }
 
 // The gesture recognizers will call this method, which will then send data to the moveTiles method
 // to move the tiles
 - (void) handleSwipe:(UISwipeGestureRecognizer*) sender {
+    
+    // Lock movement if animation is playing
+    if(animationPlaying) {
+        return;
+    }
+    
     if(sender.direction == UISwipeGestureRecognizerDirectionUp) {
         NSLog(@"[handleSwipe] Incoming Gesture: UP");
         [self moveTiles:@"UP"];
@@ -280,6 +293,11 @@ static NSMutableArray *takenCells;
         // Return position for src to go to
         return dstTile.index;
     }
+    
+    if([srcTile.value intValue] >= 2048) {
+        [self animateWinTile:srcTile];
+    }
+    
     // Cannot be combined
     return nil;
 }
@@ -500,11 +518,14 @@ static NSMutableArray *takenCells;
     [madeLabel.layer setBorderColor: [self chooseColor:8].CGColor];
     [madeLabel.layer setBorderWidth: 2.0f];
     
+    
+    animationPlaying = true;
     // Animate tile appearing so it is not delayed
     [UIView animateWithDuration:0.5 animations:^{
         [madeLabel setAlpha:1.0f];
     } completion:^(BOOL finished) {
         //
+        animationPlaying = false;
     }];
     
     Tile* tile = [[Tile alloc] init];
@@ -562,6 +583,10 @@ static NSMutableArray *takenCells;
     } completion:^(BOOL finished) {
         //
     }];
+}
+
+- (void) animateWinTile: (Tile*) tile {
+    
 }
 
 @end
