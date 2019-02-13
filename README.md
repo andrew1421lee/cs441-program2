@@ -2,6 +2,7 @@
 Number Game
 
 This is literally a clone of 2048, so I decided to make it a Chinese clone. All the text in the game is now written in Chinese. Other than that, the game is nearly identical to the original! 
+https://youtu.be/suNcC3G5D08
 
 ## Other very cool features:
 * The tiles change color programmatically!
