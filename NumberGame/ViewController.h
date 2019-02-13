@@ -37,5 +37,7 @@
 
 @property (nonatomic, strong) IBOutlet UILabel *scoreDisplay;
 
+@property (nonatomic, strong) IBOutlet UIImageView *maoDisplay;
+
 @end
 

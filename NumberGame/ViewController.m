@@ -20,7 +20,7 @@
             cell20, cell21, cell22, cell23,
             cell30, cell31, cell32, cell33;
 
-@synthesize resetButton, scoreDisplay;
+@synthesize resetButton, scoreDisplay, maoDisplay;
 
 static NSArray *backgroundCells;
 static NSArray *tileValues;
@@ -39,7 +39,7 @@ static bool animationPlaying;
                        cell10, cell11, cell12, cell13,
                        cell20, cell21, cell22, cell23,
                        cell30, cell31, cell32, cell33, nil];
-    tileValues = [NSArray arrayWithObjects: [NSNumber numberWithInt:2], [NSNumber numberWithInt:4], nil];
+    tileValues = [NSArray arrayWithObjects: [NSNumber numberWithInt:32], [NSNumber numberWithInt:64], nil];
     currentTiles = [[NSMutableArray alloc] init];
     takenCells = [[NSMutableArray alloc] init];
     
@@ -125,10 +125,10 @@ static bool animationPlaying;
 
 - (void) gameOver {
     // Create new popup to display game over message
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"GAME OVER" message:@"You lost! Too bad" preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"輸了!" message:@"你輸了! 太可惜了" preferredStyle:UIAlertControllerStyleAlert];
     
     // Assign button to reset thegame
-    UIAlertAction *ok = [UIAlertAction actionWithTitle:@"Try Again" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertAction *ok = [UIAlertAction actionWithTitle:@"再試一次" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [self resetButtonPressed:nil];
      }];
     
@@ -274,7 +274,7 @@ static bool animationPlaying;
         [currentTiles removeObject:dstTile];
         srcTile.value = [NSNumber numberWithInt:[srcTile.value intValue] * 2];
         // Update the label of src
-        [srcTile.label setText:[NSString stringWithFormat:@"%d", [srcTile.value intValue]]];
+        [srcTile.label setText:[self intToChinese:([srcTile.value intValue])]];
         // set color
         [srcTile.label setBackgroundColor:[self chooseColor:[srcTile.value intValue]]];
         [srcTile.label.layer setBorderColor: [self chooseColor:8].CGColor];
@@ -471,9 +471,12 @@ static bool animationPlaying;
 - (void) updateScore {
     int totalScore = 0;
     
+    
     for (Tile *t in currentTiles) {
         totalScore += [t.value intValue];
     }
+    
+    [maoDisplay setAlpha: (float)totalScore / 8000.0f ];
     
     [scoreDisplay setText:[NSString stringWithFormat:@"%d", totalScore]];
 }
@@ -507,8 +510,9 @@ static bool animationPlaying;
     
     // Create new Tile
     UILabel *madeLabel = [[UILabel alloc] initWithFrame:CGRectMake(x, y, width, height)];
-    [madeLabel setText:[NSString stringWithFormat:@"%d", value]];
+    [madeLabel setText:[self intToChinese:(value)]];
     [madeLabel setTextAlignment:NSTextAlignmentCenter];
+    [madeLabel setNumberOfLines:2];
     [madeLabel setAlpha:0.0f];
     madeLabel.layer.cornerRadius = 8;
     madeLabel.layer.masksToBounds = TRUE;
@@ -587,6 +591,50 @@ static bool animationPlaying;
 
 - (void) animateWinTile: (Tile*) tile {
     
+}
+
+- (NSString*) intToChinese: (int) value {
+    switch (value) {
+        case 2:
+            return @"二";
+            break;
+        case 4:
+            return @"四";
+            break;
+        case 8:
+            return @"八";
+            break;
+        case 16:
+            return @"十六";
+            break;
+        case 32:
+            return @"三十二";
+            break;
+        case 64:
+            return @"六十四";
+            break;
+        case 128:
+            return @"一百二十八";
+            break;
+        case 256:
+            return @"兩百五十六";
+            break;
+        case 512:
+            return @"五百一十二";
+            break;
+        case 1024:
+            return @"一千二十四";
+            break;
+        case 2048:
+            return @"兩千四十八";
+            break;
+        case 4096:
+            return @"四千九十六";
+            break;
+        default:
+            return @"錯誤";
+            break;
+    }
 }
 
 @end
