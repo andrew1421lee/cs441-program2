@@ -39,7 +39,7 @@ static bool animationPlaying;
                        cell10, cell11, cell12, cell13,
                        cell20, cell21, cell22, cell23,
                        cell30, cell31, cell32, cell33, nil];
-    tileValues = [NSArray arrayWithObjects: [NSNumber numberWithInt:32], [NSNumber numberWithInt:64], nil];
+    tileValues = [NSArray arrayWithObjects: [NSNumber numberWithInt:2], [NSNumber numberWithInt:4], nil];
     currentTiles = [[NSMutableArray alloc] init];
     takenCells = [[NSMutableArray alloc] init];
     
